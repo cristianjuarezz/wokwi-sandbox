@@ -10,12 +10,33 @@
 $ErrorActionPreference = 'Stop'
 
 $Root = $PSScriptRoot
-$PioDir = Join-Path $env:USERPROFILE '.platformio\penv\Scripts'
-$PioExe = Join-Path $PioDir 'pio.exe'
+
+# Buscar pio en multiples ubicaciones posibles.
+$PioCandidates = @(
+    (Join-Path $env:USERPROFILE '.platformio\penv\Scripts')
+)
+
+# Agregar la ruta Scripts de la instalacion de Python via pip global.
+$PyScripts = $null
+try {
+    $PyScripts = & python -c "import sys,os; print(os.path.join(os.path.dirname(sys.executable),'Scripts'))" 2>$null
+} catch {}
+if ($PyScripts -and (Test-Path -LiteralPath (Join-Path $PyScripts 'pio.exe'))) {
+    $PioCandidates += $PyScripts
+}
+
+$PioDir = $null
+foreach ($Candidate in $PioCandidates) {
+    $Exe = Join-Path $Candidate 'pio.exe'
+    if (Test-Path -LiteralPath $Exe) {
+        $PioDir = $Candidate
+        break
+    }
+}
 
 # 1) Hacer que 'pio' resuelva en esta sesion si no esta en el PATH actual.
 if (-not (Get-Command pio -ErrorAction SilentlyContinue)) {
-    if (Test-Path -LiteralPath $PioExe) {
+    if ($PioDir) {
         Write-Host "Agregando PlatformIO al PATH de la sesion: $PioDir" -ForegroundColor Cyan
         $env:PATH = "$PioDir;$env:PATH"
     }
@@ -23,8 +44,7 @@ if (-not (Get-Command pio -ErrorAction SilentlyContinue)) {
 
 # 2) Verificar que pio exista; si no, salir con codigo != 0.
 if (-not (Get-Command pio -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: No se encontro 'pio' en el PATH ni en $PioExe." -ForegroundColor Red
-    Write-Host "Instala PlatformIO Core 6.x o agrega manualmente su carpeta de Scripts al PATH." -ForegroundColor Red
+    Write-Host "ERROR: No se encontro 'pio'. Instalalo con: pip install platformio" -ForegroundColor Red
     exit 1
 }
 
