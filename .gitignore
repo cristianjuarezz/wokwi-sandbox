@@ -1,0 +1,32 @@
+# PlatformIO
+.pio/
+build/
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
+.clangd
+.clang-format
+.clang-tidy
+
+# Wokwi (binarios generados por el vscode-url-download)
+.wokwi/
+*.png
+
+# Windows
+Thumbs.db
+Desktop.ini
+*.exe
+*.dll
+*.lib
+*.obj
+*.o
+*.hex
+*.elf
+
+# Editor
+*.swp
+*.swo
+*~
+.idea/
+*.iml
