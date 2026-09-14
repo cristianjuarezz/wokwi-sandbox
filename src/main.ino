@@ -1,39 +1,41 @@
 /*
   Escenario II: Giro en intersecciones
-  
+
   Se modificaron algunas calles de Hurlingham, incorporándole giro en algunas
   ocasiones. Como, por ejemplo, en la intersección de las calles Corraceros y Pedro
   Díaz, donde los semáforos permiten giros en las direcciones correspondientes, y
   los vehículos deben seguir las señales para evitar accidentes y mantener el flujo
-  adecuado del tráfico. 
+  adecuado del tráfico.
 
   Para girar a la izq, el contrario debe estar rojo
 */
-#include <stdio.h>
-using namespace std; 
-enum Status {
-    Verde,
-    Amarillo,
-    Rojo
+
+
+enum Status
+{
+  Verde,
+  Amarillo,
+  Rojo
 };
-const char* StatusNames[] = {
+const char *StatusNames[] = {
     "Verde",
     "Amarillo",
-    "Rojo"
-};
+    "Rojo"};
 
 typedef int PIN_ID;
 
-struct Semaphore {
-    Status status;
-    PIN_ID red;
-    PIN_ID yellow;
-    PIN_ID green;
+struct Semaphore
+{
+  Status status;
+  PIN_ID red;
+  PIN_ID yellow;
+  PIN_ID green;
 };
 
-struct TurnLeft {
-    bool isOn;
-    PIN_ID red;
+struct TurnLeft
+{
+  bool isOn;
+  PIN_ID red;
 };
 
 struct Semaphore semaphore1 = {Rojo, 13, 12, 11};
@@ -44,28 +46,37 @@ struct TurnLeft ThreeToLeft = {false, 0};
 struct TurnLeft TwoToLeft = {false, 0};
 
 // Setters
-void SetSemaphore(Semaphore s, Status newStatus)
+void SetSemaphore(Semaphore &s, Status newStatus)
 {
   s.status = newStatus;
   OffLEDs(s);
   TurnOnStatusLED(s);
 }
 
-void OffLEDs(Semaphore s)
+void OffLEDs(Semaphore &s)
 {
   digitalWrite(s.red, LOW);
   digitalWrite(s.yellow, LOW);
   digitalWrite(s.green, LOW);
 }
 
-void TurnOnStatusLED(Semaphore s)
+void TurnOnStatusLED(Semaphore &s)
 {
-  if (s.status == Rojo) { digitalWrite(s.red, HIGH); }
-  if (s.status == Amarillo) { digitalWrite(s.yellow, HIGH); }
-  if (s.status == Verde) { digitalWrite(s.green, HIGH); }
+  if (s.status == Rojo)
+  {
+    digitalWrite(s.red, HIGH);
+  }
+  if (s.status == Amarillo)
+  {
+    digitalWrite(s.yellow, HIGH);
+  }
+  if (s.status == Verde)
+  {
+    digitalWrite(s.green, HIGH);
+  }
 }
 
-void EnableSemaphore(Semaphore s)
+void EnableSemaphore(Semaphore &s)
 {
   pinMode(s.red, OUTPUT);
   pinMode(s.yellow, OUTPUT);
@@ -74,6 +85,7 @@ void EnableSemaphore(Semaphore s)
 
 void setup() // Habilito ambos semaforos
 {
+  Serial.begin(9600);
   // Habilitar pines de semaforo
   EnableSemaphore(semaphore1);
   EnableSemaphore(semaphore2);
@@ -84,50 +96,58 @@ void setup() // Habilito ambos semaforos
 float segundosPorFase = 0.5;
 void EsperarEtapa()
 {
-  printf("ESTADOS");
-  printf(StatusNames[semaphore1.status]);
-  printf(StatusNames[semaphore2.status]);
-  printf(StatusNames[semaphore3.status]);
-  printf(StatusNames[semaphore4.status]);
-  printf("=======");
-  delay(1000*segundosPorFase);
+  Serial.print("ESTADOS");
+  Serial.print(StatusNames[semaphore1.status]);
+  Serial.print(StatusNames[semaphore2.status]);
+  Serial.print(StatusNames[semaphore3.status]);
+  Serial.print(StatusNames[semaphore4.status]);
+  Serial.println("=======");
+  delay(1000 * segundosPorFase);
 }
 
 bool turnoDe3 = true;
 
 // Fases
-void VVRR(){
+void VVRR()
+{
   SetSemaphore(semaphore1, Verde);
   SetSemaphore(semaphore4, Verde);
   SetSemaphore(semaphore2, Rojo);
   SetSemaphore(semaphore3, Rojo);
   AARR();
 }
-void AARR(){
+void AARR()
+{
   SetSemaphore(semaphore1, Amarillo);
   SetSemaphore(semaphore4, Amarillo);
   SetSemaphore(semaphore2, Rojo);
   SetSemaphore(semaphore3, Rojo);
   RRRR();
 }
-void RRRR(){
+void RRRR()
+{
   SetSemaphore(semaphore1, Rojo);
   SetSemaphore(semaphore4, Rojo);
   SetSemaphore(semaphore2, Rojo);
   SetSemaphore(semaphore3, Rojo);
   RRXX();
 }
-void RRXX(){
+void RRXX()
+{
   SetSemaphore(semaphore1, Rojo);
   SetSemaphore(semaphore4, Rojo);
   // O activar el 3 o activar el 2, nunca juntos
-  if (turnoDe3) {
+  if (turnoDe3)
+  {
     RRAR();
-  } else {
+  }
+  else
+  {
     RRRA();
   }
 }
-void RRAR(){
+void RRAR()
+{
   SetSemaphore(semaphore1, Rojo);
   SetSemaphore(semaphore4, Rojo);
   SetSemaphore(semaphore2, Rojo);
@@ -140,7 +160,8 @@ void RRAR(){
   turnoDe3 = false;
   RRRR();
 }
-void RRRA(){
+void RRRA()
+{
   SetSemaphore(semaphore1, Rojo);
   SetSemaphore(semaphore4, Rojo);
   SetSemaphore(semaphore2, Amarillo);
@@ -155,6 +176,7 @@ void RRRA(){
 }
 
 // SUpongamos que: tiempo entre fases sea 7 segundos
-void loop() { 
+void loop()
+{
   VVRR();
 }
