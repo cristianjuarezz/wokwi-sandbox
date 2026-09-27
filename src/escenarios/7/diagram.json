@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "author": "Hernan Nicolaus",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-breadboard-half",
+      "id": "bb1",
+      "top": -185.4,
+      "left": 118,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-arduino-uno",
+      "id": "uno",
+      "top": 67.8,
+      "left": 201,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-hc-sr04",
+      "id": "sensor",
+      "top": -180.9,
+      "left": 322.3,
+      "attrs": {
+        "distance": "100"
+      }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo",
+      "top": -78.8,
+      "left": 547.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": -157.2,
+      "left": 176.6,
+      "attrs": {
+        "color": "green"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": -101.65,
+      "left": 201.6,
+      "attrs": {
+        "value": "220"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "uno:GND.1",
+      "bb1:bn.1",
+      "black",
+      [
+        "v-28.8",
+        "h-191.7",
+        "v-37.1"
+      ]
+    ],
+    [
+      "uno:5V",
+      "bb1:bp.1",
+      "red",
+      [
+        "v38.3",
+        "h-255.4",
+        "v-296.7"
+      ]
+    ],
+    [
+      "sensor:VCC",
+      "bb1:bp.20",
+      "red",
+      []
+    ],
+    [
+      "sensor:TRIG",
+      "uno:10",
+      "green",
+      [
+        "v60.9",
+        "h-56.8"
+      ]
+    ],
+    [
+      "sensor:ECHO",
+      "uno:9",
+      "blue",
+      [
+        "h1.1",
+        "v118.5",
+        "h-58.4"
+      ]
+    ],
+    [
+      "servo:V+",
+      "bb1:bp.25",
+      "red",
+      [
+        "v0.1",
+        "h-126.4"
+      ]
+    ],
+    [
+      "servo:GND",
+      "bb1:bn.25",
+      "black",
+      [
+        "h-76.8",
+        "v39.7"
+      ]
+    ],
+    [
+      "servo:PWM",
+      "uno:6",
+      "orange",
+      [
+        "h-20",
+        "v147.8"
+      ]
+    ],
+    [
+      "uno:8",
+      "r1:2",
+      "green",
+      [
+        "v-48",
+        "h-113.6"
+      ]
+    ],
+    [
+      "r1:1",
+      "led1:A",
+      "green",
+      []
+    ],
+    [
+      "led1:C",
+      "bb1:bn.8",
+      "black",
+      [
+        "h0.4",
+        "v126.1"
+      ]
+    ],
+    [
+      "led1:A",
+      "bb1:7t.c",
+      "",
+      [
+        "$bb"
+      ]
+    ],
+    [
+      "led1:C",
+      "bb1:6t.c",
+      "",
+      [
+        "$bb"
+      ]
+    ],
+    [
+      "r1:1",
+      "bb1:7t.e",
+      "",
+      [
+        "$bb"
+      ]
+    ],
+    [
+      "r1:2",
+      "bb1:13t.e",
+      "",
+      [
+        "$bb"
+      ]
+    ],
+    [
+      "sensor:GND",
+      "bb1:bn.21",
+      "black",
+      [
+        "v32.1",
+        "h0.7"
+      ]
+    ]
+  ],
+  "dependencies": {}
+}
