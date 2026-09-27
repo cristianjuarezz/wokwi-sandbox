@@ -19,12 +19,28 @@ $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
 
 # Buscar pio en multiples ubicaciones posibles (igual que setup.ps1).
-$PioExe = Join-Path $env:USERPROFILE '.platformio\penv\Scripts\pio.exe'
+$PioCandidates = @(
+    (Join-Path $env:USERPROFILE '.platformio\penv\Scripts')
+)
+
+$PyScripts = $null
+try {
+    $PyScripts = & python -c "import sys,os; print(os.path.join(os.path.dirname(sys.executable),'Scripts'))" 2>$null
+} catch {}
+if ($PyScripts -and (Test-Path -LiteralPath (Join-Path $PyScripts 'pio.exe'))) {
+    $PioCandidates += $PyScripts
+}
 
 # 1) Verificar pio.
 if (-not (Get-Command pio -ErrorAction SilentlyContinue)) {
-    if (Test-Path -LiteralPath $PioExe) {
-        $PioDir = Split-Path -Parent $PioExe
+    $PioDir = $null
+    foreach ($Candidate in $PioCandidates) {
+        if (Test-Path -LiteralPath (Join-Path $Candidate 'pio.exe')) {
+            $PioDir = $Candidate
+            break
+        }
+    }
+    if ($PioDir) {
         Write-Host "Agregando PlatformIO al PATH de la sesion: $PioDir" -ForegroundColor Cyan
         $env:PATH = "$PioDir;$env:PATH"
     }

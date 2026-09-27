@@ -1,182 +1,61 @@
-/*
-  Escenario II: Giro en intersecciones
+#include <DHT.h>
+#include <LiquidCrystal.h>
 
-  Se modificaron algunas calles de Hurlingham, incorporándole giro en algunas
-  ocasiones. Como, por ejemplo, en la intersección de las calles Corraceros y Pedro
-  Díaz, donde los semáforos permiten giros en las direcciones correspondientes, y
-  los vehículos deben seguir las señales para evitar accidentes y mantener el flujo
-  adecuado del tráfico.
+int ledTemp=13;
+int ledHumedad=12;
+int buzzer=11;
+int sensor=10;
 
-  Para girar a la izq, el contrario debe estar rojo
-*/
+DHT dht(sensor,DHT22);
+LiquidCrystal lcd(7,6,5,4,3,2);
 
+void setup(){
 
-enum Status
-{
-  Verde,
-  Amarillo,
-  Rojo
-};
-const char *StatusNames[] = {
-    "Verde",
-    "Amarillo",
-    "Rojo"};
+  pinMode(ledTemp,OUTPUT);
+  pinMode(ledHumedad,OUTPUT);
+  pinMode(buzzer,OUTPUT);
 
-typedef int PIN_ID;
+  dht.begin();
+  lcd.begin(16,2);
 
-struct Semaphore
-{
-  Status status;
-  PIN_ID red;
-  PIN_ID yellow;
-  PIN_ID green;
-};
-
-struct TurnLeft
-{
-  bool isOn;
-  PIN_ID red;
-};
-
-struct Semaphore semaphore1 = {Rojo, 13, 12, 11};
-struct Semaphore semaphore2 = {Rojo, 4, 3, 2};
-struct Semaphore semaphore3 = {Rojo, 4, 3, 2};
-struct Semaphore semaphore4 = {Rojo, 4, 3, 2};
-struct TurnLeft ThreeToLeft = {false, 0};
-struct TurnLeft TwoToLeft = {false, 0};
-
-// Setters
-void SetSemaphore(Semaphore &s, Status newStatus)
-{
-  s.status = newStatus;
-  OffLEDs(s);
-  TurnOnStatusLED(s);
-}
-
-void OffLEDs(Semaphore &s)
-{
-  digitalWrite(s.red, LOW);
-  digitalWrite(s.yellow, LOW);
-  digitalWrite(s.green, LOW);
-}
-
-void TurnOnStatusLED(Semaphore &s)
-{
-  if (s.status == Rojo)
-  {
-    digitalWrite(s.red, HIGH);
-  }
-  if (s.status == Amarillo)
-  {
-    digitalWrite(s.yellow, HIGH);
-  }
-  if (s.status == Verde)
-  {
-    digitalWrite(s.green, HIGH);
-  }
-}
-
-void EnableSemaphore(Semaphore &s)
-{
-  pinMode(s.red, OUTPUT);
-  pinMode(s.yellow, OUTPUT);
-  pinMode(s.green, OUTPUT);
-}
-
-void setup() // Habilito ambos semaforos
-{
   Serial.begin(9600);
-  // Habilitar pines de semaforo
-  EnableSemaphore(semaphore1);
-  EnableSemaphore(semaphore2);
-  EnableSemaphore(semaphore3);
-  EnableSemaphore(semaphore4);
 }
 
-float segundosPorFase = 0.5;
-void EsperarEtapa()
-{
-  Serial.print("ESTADOS");
-  Serial.print(StatusNames[semaphore1.status]);
-  Serial.print(StatusNames[semaphore2.status]);
-  Serial.print(StatusNames[semaphore3.status]);
-  Serial.print(StatusNames[semaphore4.status]);
-  Serial.println("=======");
-  delay(1000 * segundosPorFase);
-}
+void loop(){
 
-bool turnoDe3 = true;
+  float temperatura=dht.readTemperature();
+  float humedad=dht.readHumidity();
 
-// Fases
-void VVRR()
-{
-  SetSemaphore(semaphore1, Verde);
-  SetSemaphore(semaphore4, Verde);
-  SetSemaphore(semaphore2, Rojo);
-  SetSemaphore(semaphore3, Rojo);
-  AARR();
-}
-void AARR()
-{
-  SetSemaphore(semaphore1, Amarillo);
-  SetSemaphore(semaphore4, Amarillo);
-  SetSemaphore(semaphore2, Rojo);
-  SetSemaphore(semaphore3, Rojo);
-  RRRR();
-}
-void RRRR()
-{
-  SetSemaphore(semaphore1, Rojo);
-  SetSemaphore(semaphore4, Rojo);
-  SetSemaphore(semaphore2, Rojo);
-  SetSemaphore(semaphore3, Rojo);
-  RRXX();
-}
-void RRXX()
-{
-  SetSemaphore(semaphore1, Rojo);
-  SetSemaphore(semaphore4, Rojo);
-  // O activar el 3 o activar el 2, nunca juntos
-  if (turnoDe3)
-  {
-    RRAR();
-  }
+  Serial.print("Temperatura: ");
+  Serial.print(temperatura);
+  Serial.print(" C  Humedad: ");
+  Serial.print(humedad);
+  Serial.println(" %");
+
+  lcd.setCursor(0,0);
+  lcd.print("Temp: ");
+  lcd.print(temperatura,1);
+  lcd.print(" C   ");
+
+  lcd.setCursor(0,1);
+  lcd.print("Hum: ");
+  lcd.print(humedad,1);
+  lcd.print(" %   ");
+
+  if(temperatura>25)
+    digitalWrite(ledTemp,HIGH);
   else
-  {
-    RRRA();
-  }
-}
-void RRAR()
-{
-  SetSemaphore(semaphore1, Rojo);
-  SetSemaphore(semaphore4, Rojo);
-  SetSemaphore(semaphore2, Rojo);
-  SetSemaphore(semaphore3, Amarillo);
-  EsperarEtapa();
-  SetSemaphore(semaphore3, Verde);
-  EsperarEtapa();
-  SetSemaphore(semaphore3, Amarillo);
-  EsperarEtapa();
-  turnoDe3 = false;
-  RRRR();
-}
-void RRRA()
-{
-  SetSemaphore(semaphore1, Rojo);
-  SetSemaphore(semaphore4, Rojo);
-  SetSemaphore(semaphore2, Amarillo);
-  SetSemaphore(semaphore3, Rojo);
-  EsperarEtapa();
-  SetSemaphore(semaphore2, Verde);
-  EsperarEtapa();
-  SetSemaphore(semaphore2, Amarillo);
-  EsperarEtapa();
-  turnoDe3 = true;
-  RRRR();
-}
+    digitalWrite(ledTemp,LOW);
 
-// SUpongamos que: tiempo entre fases sea 7 segundos
-void loop()
-{
-  VVRR();
+  if(humedad>70)
+    digitalWrite(ledHumedad,HIGH);
+  else
+    digitalWrite(ledHumedad,LOW);
+
+  if(temperatura>25 || humedad>70)
+    tone(buzzer,1000);
+  else
+    noTone(buzzer);
+
+  delay(1000);
 }
