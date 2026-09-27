@@ -1,6 +1,8 @@
 # PlatformIO
 .pio/
 build/
+# Generado por la conversion .ino -> .cpp de PlatformIO
+src/*.ino.cpp
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/tasks.json
